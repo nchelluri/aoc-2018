@@ -13,13 +13,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-		candidate := scanner.Text()
-
-		if candidate[0] == '+' {
-			candidate = candidate[1:]
-		}
-
-		freqChange, err := strconv.Atoi(candidate)
+		freqChange, err := strconv.Atoi(scanner.Text())
 
 		if err != nil {
 			panic(err)
