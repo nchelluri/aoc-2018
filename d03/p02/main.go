@@ -9,19 +9,9 @@ import (
 )
 
 func main() {
-	fabric := [][]int{}
-
 	const fabricDims = 1000
 
-	for i := 0; i < fabricDims; i++ {
-		fabricRow := []int{}
-
-		for j := 0; j < fabricDims; j++ {
-			fabricRow = append(fabricRow, 0)
-		}
-
-		fabric = append(fabric, fabricRow)
-	}
+	fabric := [fabricDims][fabricDims]int{}
 
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -35,16 +25,16 @@ func main() {
 			panic("error parsing claim")
 		}
 
-		values := []int{}
+		values := [5]int{}
 
-		for _, valueStr := range valueStrs[1:] {
+		for i, valueStr := range valueStrs[1:] {
 			value, err := strconv.Atoi(valueStr)
 
 			if err != nil {
 				panic(err)
 			}
 
-			values = append(values, value)
+			values[i] = value
 		}
 
 		claimNum := values[0]
@@ -91,20 +81,5 @@ FinalClaimCheck:
 		}
 
 		fmt.Println(claimNum)
-	}
-}
-
-func printFabric(fabric [][]int) {
-	for _, fabricRow := range fabric {
-		for _, fabricPoint := range fabricRow {
-			output := "."
-			if fabricPoint > 1 {
-				output = "X"
-			} else if fabricPoint > 0 {
-				output = "#"
-			}
-			fmt.Printf("%s", output)
-		}
-		fmt.Println()
 	}
 }
