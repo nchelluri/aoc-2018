@@ -55,8 +55,20 @@ func main() {
 		panic(err)
 	}
 
-	for i := 0; i < 1000000000; i++ {
-		update(&points, i)
+	var xRange, yRange *int
+	for i := 0; ; i++ {
+		newXRange, newYRange := update(&points, i)
+
+		if xRange == nil && yRange == nil {
+			xRange = &newXRange
+			yRange = &newYRange
+			continue
+		}
+
+		if *xRange < newXRange && *yRange < newYRange {
+			// grid is getting bigger, not smaller: we are done
+			break
+		}
 	}
 }
 
@@ -90,7 +102,7 @@ func print(points []point, minX, maxX, minY, maxY, currentTime int) {
 
 }
 
-func update(points *[]point, currentTime int) {
+func update(points *[]point, currentTime int) (int, int) {
 	minX, minY, maxX, maxY := math.MaxInt32, math.MaxInt32, math.MinInt32, math.MinInt32
 
 	for i, point := range *points {
@@ -118,4 +130,6 @@ func update(points *[]point, currentTime int) {
 	if maxX-minX < 100 && maxY-minY < 100 {
 		print(*points, minX, maxX, minY, maxY, currentTime)
 	}
+
+	return maxX - minX, maxY - minY
 }
