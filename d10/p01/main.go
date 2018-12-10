@@ -55,17 +55,17 @@ func main() {
 		panic(err)
 	}
 
-	var xRange, yRange *int
+	var initialXRange, initialYRange *int
 	for i := 0; ; i++ {
 		newXRange, newYRange := update(&points, i)
 
-		if xRange == nil && yRange == nil {
-			xRange = &newXRange
-			yRange = &newYRange
+		if initialXRange == nil && initialYRange == nil {
+			initialXRange = &newXRange
+			initialYRange = &newYRange
 			continue
 		}
 
-		if *xRange < newXRange && *yRange < newYRange {
+		if *initialXRange < newXRange && *initialYRange < newYRange {
 			// grid is getting bigger, not smaller: we are done
 			break
 		}
