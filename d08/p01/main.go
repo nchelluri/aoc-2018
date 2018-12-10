@@ -48,11 +48,11 @@ func parseNodes(numNodes, startIndex int, values []int) ([]node, int) {
 		numChildren := values[pos]
 		numMetadata := values[pos+1]
 
-		children := []node{}
-		metadata := []int{}
+		var children []node
+		var metadata []int
 		if numChildren == 0 {
 			metadata = values[pos+2 : pos+2+numMetadata]
-			pos = pos + 2 + numMetadata
+			pos += 2 + numMetadata
 		} else {
 			newChildren, metadataIndex := parseNodes(numChildren, pos+2, values)
 			children = newChildren
