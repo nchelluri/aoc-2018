@@ -2,58 +2,91 @@ package main
 
 import (
 	"container/list"
+	"flag"
 	"fmt"
 )
 
-const numPlayers = 432
-const lastMarble = 7101900
-
 // MarbleCircle is an AoC 2018 day 9 marble circle.
 type MarbleCircle struct {
-	CurrentMarble   int
-	marbles         *list.List
+	CurrentMarble int
+
 	currentMarbleEl *list.Element
 	lastMarble      int
-}
-
-// NewMarbleCircle creates a new MarbleCircle.
-func NewMarbleCircle(lastMarble int) *MarbleCircle {
-	list := list.New()
-	currentMarbleEl := list.PushFront(0)
-	return &MarbleCircle{
-		marbles:         list,
-		currentMarbleEl: currentMarbleEl,
-		CurrentMarble:   1,
-		lastMarble:      lastMarble,
-	}
+	marbles         *list.List
+	scores          []int
+	turn            int
+	verbose         bool
 }
 
 func main() {
-	scores := [numPlayers]int{}
-	m := NewMarbleCircle(lastMarble)
+	numPlayers := flag.Int("numPlayers", 432, "number of players")
+	lastMarble := flag.Int("lastMarble", 7101900, "last marble")
+	verbose := flag.Bool("verbose", false, "sets verbose mode on")
+	flag.Parse()
+	m := NewMarbleCircle(*numPlayers, *lastMarble, *verbose)
 
-	for turn := 0; m.CurrentMarble <= m.lastMarble; turn, m.CurrentMarble = (turn+1)%numPlayers, m.CurrentMarble+1 {
-		if m.CurrentMarble%23 == 0 {
-			scores[turn] += m.CurrentMarble + m.Remove()
-		} else {
-			m.Place()
-		}
-
-		// m.Print(turn)
+	for m.Process() {
 	}
 
+	fmt.Println(m.HighScore())
+}
+
+// NewMarbleCircle creates a new MarbleCircle.
+func NewMarbleCircle(numPlayers, lastMarble int, verbose bool) *MarbleCircle {
+	list := list.New()
+	currentMarbleEl := list.PushFront(0)
+	scores := []int{}
+	for i := 0; i < numPlayers; i++ {
+		scores = append(scores, 0)
+	}
+	return &MarbleCircle{
+		CurrentMarble: 1,
+
+		currentMarbleEl: currentMarbleEl,
+		lastMarble:      lastMarble,
+		marbles:         list,
+		scores:          scores,
+		turn:            0,
+		verbose:         verbose,
+	}
+}
+
+// Process processes the turn for the next player. Returns whether there is more processing required or not.
+func (m *MarbleCircle) Process() bool {
+	if m.CurrentMarble%23 == 0 {
+		m.scores[m.turn] += m.CurrentMarble + m.remove()
+	} else {
+		m.place()
+	}
+
+	if m.verbose {
+		m.print()
+	}
+
+	done := false
+	if m.CurrentMarble == m.lastMarble {
+		done = true
+	}
+	m.CurrentMarble++
+	m.turn = (m.turn + 1) % len(m.scores)
+
+	return !done
+}
+
+// HighScore returns the highest score for the MarbleCircle. Only makes sense once processing the game is complete.
+func (m *MarbleCircle) HighScore() int {
 	maxScore := 0
-	for _, score := range scores {
+	for _, score := range m.scores {
 		if score > maxScore {
 			maxScore = score
 		}
 	}
-	fmt.Println(maxScore)
+	return maxScore
 }
 
 // Print prints out a marble circle, as found in the Advent of Code example.
-func (m *MarbleCircle) Print(turn int) {
-	fmt.Printf("[%02d] ", turn+1)
+func (m *MarbleCircle) print() {
+	fmt.Printf("[%d] ", m.turn+1)
 	for n := m.marbles.Front(); n != nil; n = n.Next() {
 		if n.Value.(int) == m.CurrentMarble {
 			fmt.Printf("(%d) ", n.Value)
@@ -64,14 +97,14 @@ func (m *MarbleCircle) Print(turn int) {
 	fmt.Println()
 }
 
-// Place places the next marble in the marble circle.
-func (m *MarbleCircle) Place() *list.Element {
+// place places the next marble in the marble circle.
+func (m *MarbleCircle) place() *list.Element {
 	m.marbles.InsertAfter(m.CurrentMarble, m.getNext())
 	return m.getNext()
 }
 
-// Remove removes the 7th counter-clockwise marble to the current marble and returns its score.
-func (m *MarbleCircle) Remove() int {
+// remove removes the 7th counter-clockwise marble to the current marble and returns its score.
+func (m *MarbleCircle) remove() int {
 	for i := 0; i < 7; i++ {
 		m.getPrev()
 	}
