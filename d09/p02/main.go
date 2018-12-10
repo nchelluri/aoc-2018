@@ -23,11 +23,11 @@ func main() {
 	lastMarble := flag.Int("lastMarble", 7101900, "last marble")
 	verbose := flag.Bool("verbose", false, "sets verbose mode on")
 	flag.Parse()
+
 	m := NewMarbleCircle(*numPlayers, *lastMarble, *verbose)
-
 	for m.Process() {
+		// no-op
 	}
-
 	fmt.Println(m.HighScore())
 }
 
